@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>PAGE TITLE - ZenFish</title>
+<style>
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(to top, #001d33, #004466);
+    color: #f0f8ff;
+    overflow: hidden;
+  }
+  .container {
+    position: relative;
+    z-index: 2;
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 800px;
+    width: 90%;
+    margin: 50px auto;
+    text-align: center;
+    backdrop-filter: blur(5px);
+  }
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 20px;
+    color: #66d9ff;
+  }
+  a { color: #66d9ff; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  nav { margin-top: 20px; }
+
+  /* Bubbles */
+  .bubble {
+    position: absolute;
+    bottom: -50px;
+    width: 20px;
+    height: 20px;
+    background: rgba(255,255,255,0.3);
+    border-radius: 50%;
+    animation: rise 10s infinite ease-in;
+  }
+  @keyframes rise {
+    0% { transform: translateY(0) scale(1); opacity: 0.3; }
+    50% { opacity: 0.6; }
+    100% { transform: translateY(-120vh) scale(1.5); opacity: 0; }
+  }
+
+  /* Light rays */
+  .light-ray {
+    position: absolute;
+    width: 200px;
+    height: 400px;
+    background: radial-gradient(ellipse at center, rgba(255,255,255,0.1) 0%, transparent 80%);
+    top: -100px;
+    left: 50%;
+    transform: translateX(-50%) rotate(25deg);
+    animation: floatRay 6s ease-in-out infinite alternate;
+    z-index: 1;
+  }
+  @keyframes floatRay {
+    0% { transform: translateX(-50%) rotate(23deg); }
+    100% { transform: translateX(-50%) rotate(27deg); }
+  }
+
+  /* CSS Fish */
+  .fish {
+    position: absolute;
+    bottom: 30%;
+    width: 60px;
+    height: 30px;
+    background: orange;
+    border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+    animation: swim 12s linear infinite;
+    z-index: 2;
+  }
+  /* Tail */
+  .fish::before {
+    content: '';
+    position: absolute;
+    left: -20px;
+    top: 5px;
+    width: 20px;
+    height: 20px;
+    background: red;
+    clip-path: polygon(100% 50%, 0 0, 0 100%);
+  }
+  /* Eye */
+  .fish::after {
+    content: '';
+    position: absolute;
+    right: 10px;
+    top: 8px;
+    width: 6px;
+    height: 6px;
+    background: white;
+    border-radius: 50%;
+  }
+
+  @keyframes swim {
+    0% { left: -80px; transform: scaleX(1); }
+    50% { left: 100%; transform: scaleX(1); }
+    50.01% { transform: scaleX(-1); }
+    100% { left: -80px; transform: scaleX(-1); }
+  }
+</style>
+</head>
+<body>
+  <!-- Bubbles -->
+  <div class="bubble" style="left:10%; animation-duration:12s; width:15px; height:15px;"></div>
+  <div class="bubble" style="left:30%; animation-duration:15s; width:20px; height:20px;"></div>
+  <div class="bubble" style="left:50%; animation-duration:10s; width:25px; height:25px;"></div>
+  <div class="bubble" style="left:70%; animation-duration:18s; width:18px; height:18px;"></div>
+  <div class="bubble" style="left:90%; animation-duration:14s; width:22px; height:22px;"></div>
+
+  <!-- Light Rays -->
+  <div class="light-ray"></div>
+
+  <!-- Fish -->
+  <div class="fish"></div>
+
+  <div class="container">
+    <h1>Terms and Conditions</h1>
+    <p>
+<p>
+We’d love to hear from you!  
+Email: <a href="mailto:realigen787@gmail.com">realigen787@gmail.com</a><br>
+Instagram: <a href="https://instagram.com/zenfish_relax" target="_blank">@zenfish_relax</a>
+</p>
+</p>
+    </p>
+    <nav>
+      <a href="index.html">Home</a> |
+      <a href="about.html">About</a> |
+      <a href="privacy.html">Privacy</a> |
+      <a href="terms.html">Terms</a> |
+    </nav>
+  </div>
+</body>
+</html>
