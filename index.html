@@ -5,42 +5,59 @@
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>Interactive Aquarium</title>
 <style>
-  html,body {height:100%;margin:0;overflow:hidden;}
-  body {background:#001d33;}
-  canvas {display:block; width:100vw; height:100vh;}
+html, body { height:100%; margin:0; overflow:hidden; }
+body { background:#001d33; }
+canvas { display:block; width:100vw; height:100vh; }
+.footer {
+  position: fixed;
+  bottom: 15px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  font-family: Arial, sans-serif;
+  font-size: 1rem;
+}
+.footer a { color: rgba(255,255,255,0.7); text-decoration:none; transition: color 0.2s; }
+.footer a:hover { color:#fff; }
 </style>
 </head>
 <body>
 <canvas id="aquarium"></canvas>
+<div class="footer">
+  <a href="index.html">Home</a>
+  <a href="about.html">About</a>
+  <a href="privacy.html">Privacy</a>
+  <a href="terms.html">Terms</a>
+  <a href="contact.html">Contact</a>
+</div>
+
 <script>
-const canvas=document.getElementById("aquarium");
-const ctx=canvas.getContext("2d");
+const canvas = document.getElementById("aquarium");
+const ctx = canvas.getContext("2d");
 let W,H,DPR;
+
 function resize(){
-  DPR=window.devicePixelRatio||1;
-  W=window.innerWidth; H=window.innerHeight;
-  canvas.width=W*DPR; canvas.height=H*DPR;
-  canvas.style.width=W+"px"; canvas.style.height=H+"px";
+  DPR = window.devicePixelRatio || 1;
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = W*DPR; canvas.height = H*DPR;
+  canvas.style.width = W+"px"; canvas.style.height = H+"px";
   ctx.setTransform(DPR,0,0,DPR,0,0);
 }
-window.addEventListener("resize",resize);
+window.addEventListener("resize", resize);
 resize();
 
-// --- Gradient Background Day/Night ---
-let dayCycle=0; 
+// Background
+let dayCycle = 0;
 function drawBackground(){
   dayCycle += 0.00005;
   if(dayCycle>1) dayCycle=0;
-  let grad=ctx.createLinearGradient(0,0,0,H);
-  grad.addColorStop(0,`hsl(${200+60*dayCycle},70%,${20+20*dayCycle}%)`);
-  grad.addColorStop(1,`hsl(${190+40*dayCycle},60%,${10+15*dayCycle}%)`);
-  ctx.fillStyle=grad;
-  ctx.fillRect(0,0,W,H);
+  let grad = ctx.createLinearGradient(0,0,0,H);
+  grad.addColorStop(0, `hsl(${200+60*dayCycle},70%,${20+20*dayCycle}%)`);
+  grad.addColorStop(1, `hsl(${190+40*dayCycle},60%,${10+15*dayCycle}%)`);
+  ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
 
-  // Light rays
-  ctx.save();
-  ctx.globalAlpha=0.05;
-  ctx.fillStyle="white";
+  ctx.save(); ctx.globalAlpha=0.05; ctx.fillStyle="white";
   for(let i=0;i<5;i++){
     ctx.beginPath();
     ctx.moveTo(W*(i/5),0);
@@ -52,184 +69,146 @@ function drawBackground(){
   ctx.restore();
 }
 
-// --- Seaweed ---
+// Seaweed
 class Seaweed{
-  constructor(x){
-    this.x=x; this.height=50+Math.random()*100; this.offset=Math.random()*100;
-  }
+  constructor(x){ this.x=x; this.height=50+Math.random()*100; this.offset=Math.random()*100; }
   draw(t){
     ctx.strokeStyle="green"; ctx.lineWidth=4; ctx.beginPath();
     for(let y=0;y<this.height;y+=10){
-      let sway=Math.sin((y/20)+t+this.offset)*5;
+      let sway = Math.sin((y/20)+t+this.offset)*5;
       ctx.lineTo(this.x+sway,H-y);
     }
     ctx.stroke();
   }
 }
 
-// --- Bubble ---
+// Bubble
 class Bubble{
-  constructor(){this.reset();}
-  reset(){this.x=Math.random()*W; this.y=H+20; this.r=Math.random()*5+2; this.speed=Math.random()*30+20;}
-  update(dt){this.y-=this.speed*dt;if(this.y+this.r<0)this.reset();}
-  draw(){ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2); ctx.fillStyle="rgba(255,255,255,0.5)"; ctx.fill();}
+  constructor(){ this.reset(); }
+  reset(){ this.x=Math.random()*W; this.y=H+20; this.r=Math.random()*5+2; this.speed=Math.random()*30+20; }
+  update(dt){ this.y -= this.speed*dt; if(this.y+this.r<0) this.reset(); }
+  draw(){ ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2); ctx.fillStyle="rgba(255,255,255,0.5)"; ctx.fill(); }
 }
 
-// --- Pellet (no ripple) ---
+// Pellet
 class Pellet{
-  constructor(x,y){this.x=x; this.y=y; this.r=5; this.speed=100; this.eaten=false;}
-  update(dt){
-    if(!this.eaten) this.y+=this.speed*dt;
-    if(this.y>H) this.eaten=true;
-  }
-  draw(){
-    if(this.eaten) return;
-    ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2);
-    ctx.fillStyle="brown"; ctx.fill();
-  }
+  constructor(x,y){ this.x=x; this.y=y; this.r=5; this.speed=100; this.eaten=false; }
+  update(dt){ if(!this.eaten) this.y += this.speed*dt; if(this.y>H) this.eaten=true; }
+  draw(){ if(this.eaten) return; ctx.beginPath(); ctx.arc(this.x,this.y,this.r,0,Math.PI*2); ctx.fillStyle="brown"; ctx.fill(); }
 }
 
-// --- Pet Fish ---
+// Pet Fish
 class PetFish{
-  constructor(){this.x=W/2; this.y=H/2; this.size=40; this.time=0; this.facing=1; this.target=null;}
-  setTarget(target){this.target=target;}
+  constructor(){ this.x=W/2; this.y=H/2; this.size=40; this.time=0; this.facing=1; this.target=null; }
+  setTarget(target){ this.target=target; }
   update(dt){
-    this.time+=dt;
+    this.time += dt;
     if(this.target && !this.target.eaten){
-      let dx=this.target.x-this.x, dy=this.target.y-this.y;
-      let dist=Math.hypot(dx,dy);
-      if(dist<this.size*0.8){this.target.eaten=true; this.target=null;}
-      else {
-        let speed=Math.min(250,dist*3);
-        this.x+=(dx/dist)*speed*dt;
-        this.y+=(dy/dist)*speed*dt;
-        this.facing=dx>=0?1:-1;
+      let dx=this.target.x-this.x, dy=this.target.y-this.y, dist=Math.hypot(dx,dy);
+      if(dist<this.size*0.8){ this.target.eaten=true; this.target=null; }
+      else{
+        let speed = Math.min(250, dist*3);
+        let moveX = (dx/dist)*speed*dt;
+        let moveY = (dy/dist)*speed*dt;
+        this.x += moveX;
+        this.y += moveY;
+        if(moveX!==0) this.facing = moveX>0?1:-1;
       }
     } else {
-      this.x+=Math.sin(this.time*0.5)*0.5;
-      this.y+=Math.cos(this.time*0.3)*0.3;
+      let moveX = Math.sin(this.time*0.5)*0.5;
+      let moveY = Math.cos(this.time*0.3)*0.3;
+      this.x += moveX; this.y += moveY;
+      if(moveX!==0) this.facing = moveX>0?1:-1;
     }
   }
   draw(){
     ctx.save(); ctx.translate(this.x,this.y); ctx.scale(this.facing,1);
-    let grad=ctx.createLinearGradient(-this.size,0,this.size,0);
+    let grad = ctx.createLinearGradient(-this.size,0,this.size,0);
     grad.addColorStop(0,"#ff9933"); grad.addColorStop(1,"#ffcc66");
-    ctx.fillStyle=grad;
-    ctx.beginPath(); ctx.ellipse(0,0,this.size,this.size*0.6,0,0,Math.PI*2); ctx.fill();
-    let flap=Math.sin(this.time*12)*12;
-    ctx.beginPath(); ctx.moveTo(-this.size,0);
-    ctx.lineTo(-this.size-20, flap+this.size*0.4);
-    ctx.lineTo(-this.size-20, flap-this.size*0.4);
-    ctx.closePath(); ctx.fill();
+    ctx.fillStyle = grad; ctx.beginPath(); ctx.ellipse(0,0,this.size,this.size*0.6,0,0,Math.PI*2); ctx.fill();
+    let flap = Math.sin(this.time*12)*12;
+    ctx.beginPath(); ctx.moveTo(-this.size,0); ctx.lineTo(-this.size-20,flap+this.size*0.4); ctx.lineTo(-this.size-20,flap-this.size*0.4); ctx.closePath(); ctx.fill();
     ctx.restore();
   }
 }
 
-// --- Other Fish ---
+// Other Fish
 class Fish{
   constructor(){
-    this.size=Math.random()*20+20; 
-    this.color=`hsl(${Math.random()*360},70%,60%)`;
-    this.x=Math.random()*W; this.y=Math.random()*H*0.8+H*0.1;
-    this.speed=(Math.random()*40+20)*(Math.random()<0.5?-1:1);
-    this.time=0; this.facing=this.speed>0?1:-1;
-    this.chasing=null;
+    this.size = Math.random()*20+20; 
+    this.color = `hsl(${Math.random()*360},70%,60%)`;
+    this.x = Math.random()*W; this.y = Math.random()*H*0.8+H*0.1;
+    this.speed = (Math.random()*40+20)*(Math.random()<0.5? -1 : 1);
+    this.time = 0; this.facing = this.speed>0?1:-1; this.chasing=null;
   }
-  update(dt,pellet){
-    this.time+=dt; 
-    // Chase pellet if pet fish misses
-    if(pellet && !pellet.eaten && !this.chasing){
-      let dx=pellet.x-this.x, dy=pellet.y-this.y;
-      let dist=Math.hypot(dx,dy);
-      if(dist<150 && Math.random()<0.01){this.chasing=pellet;}
+  update(dt, pellet, otherFish, petFish){
+    this.time += dt;
+
+    // Pellet chasing
+    if(pellet && !pellet.eaten){
+      let dist = Math.hypot(this.x - pellet.x, this.y - pellet.y);
+      if(dist<200 || (!petFish.target || petFish.target.eaten)){ this.chasing = pellet; }
     }
+
     if(this.chasing && !this.chasing.eaten){
-      let dx=this.chasing.x-this.x, dy=this.chasing.y-this.y;
-      let dist=Math.hypot(dx,dy);
-      if(dist<this.size*0.6){this.chasing.eaten=true; this.chasing=null;}
-      else {this.x+=(dx/dist)*80*dt; this.y+=(dy/dist)*80*dt; this.facing=dx>=0?1:-1;}
+      let dx = this.chasing.x - this.x;
+      let dy = this.chasing.y - this.y;
+      let dist = Math.hypot(dx, dy);
+      if(dist<this.size*0.6){ this.chasing.eaten=true; this.chasing=null; }
+      else{
+        let moveX = (dx/dist)*80*dt;
+        let moveY = (dy/dist)*80*dt;
+        this.x += moveX; this.y += moveY;
+        if(moveX!==0) this.facing = moveX>0?1:-1;
+      }
     } else {
-      this.x+=this.speed*dt;
-      if(this.speed>0 && this.x>W+this.size){this.x=-this.size;}
-      if(this.speed<0 && this.x<-this.size){this.x=W+this.size;}
+      let moveX = this.speed*dt;
+      this.x += moveX;
+      if(this.x>W+this.size) this.x=-this.size;
+      if(this.x<-this.size) this.x=W+this.size;
+      if(moveX!==0) this.facing = moveX>0?1:-1;
     }
   }
+
   draw(){
-    ctx.save(); ctx.translate(this.x,this.y); ctx.scale(this.facing,1);
-    ctx.fillStyle=this.color;
+    ctx.save(); ctx.translate(this.x,this.y); ctx.scale(this.facing,1); ctx.fillStyle=this.color;
     ctx.beginPath(); ctx.ellipse(0,0,this.size,this.size*0.6,0,0,Math.PI*2); ctx.fill();
-    let flap=Math.sin(this.time*10)*8;
-    ctx.beginPath(); ctx.moveTo(-this.size,0);
-    ctx.lineTo(-this.size-15, flap+this.size*0.4);
-    ctx.lineTo(-this.size-15, flap-this.size*0.4);
-    ctx.closePath(); ctx.fill();
+    let flap=Math.sin(this.time*10)*8; 
+    ctx.beginPath(); ctx.moveTo(-this.size,0); ctx.lineTo(-this.size-15,flap+this.size*0.4); ctx.lineTo(-this.size-15,flap-this.size*0.4); ctx.closePath(); ctx.fill();
     ctx.restore();
   }
 }
 
-// --- Objects ---
-let bubbles=Array.from({length:25},()=>new Bubble());
-let seaweed=Array.from({length:10},(_,i)=>new Seaweed(i*W/10+20));
-let petFish=new PetFish();
-let otherFish=Array.from({length:8},()=>new Fish());
-let pellet=null;
+// Objects
+let bubbles = Array.from({length:25},()=>new Bubble());
+let seaweed = Array.from({length:10},(_,i)=>new Seaweed(i*W/10+20));
+let petFish = new PetFish();
+let otherFish = Array.from({length:8},()=>new Fish());
+let pellet = null;
 
-// --- Input ---
-function dropPellet(x,y){pellet=new Pellet(x,y);}
-canvas.addEventListener("click",e=>{const r=canvas.getBoundingClientRect(); dropPellet(e.clientX-r.left,e.clientY-r.top);});
-canvas.addEventListener("touchstart",e=>{const r=canvas.getBoundingClientRect(); const t=e.touches[0]; dropPellet(t.clientX-r.left,t.clientY-r.top);},{passive:true});
+// Input
+function dropPellet(x,y){ pellet=new Pellet(x,y);}
+canvas.addEventListener("click", e=>{ const r=canvas.getBoundingClientRect(); dropPellet(e.clientX-r.left, e.clientY-r.top); });
+canvas.addEventListener("touchstart", e=>{ const r=canvas.getBoundingClientRect(); const t=e.touches[0]; dropPellet(t.clientX-r.left, t.clientY-r.top); },{passive:true});
 
-// --- Auto Feed ---
-let autoFeed=true;
-setInterval(()=>{if(autoFeed && !pellet) dropPellet(Math.random()*W,50);},4000);
+// Auto Feed
+let autoFeed = true;
+setInterval(()=>{ if(autoFeed && !pellet) dropPellet(Math.random()*W,50); },4000);
 
-// --- Loop ---
-let last=performance.now()/1000;
+// Loop
+let last = performance.now()/1000;
 function loop(nowMs){
-  const now=nowMs/1000; let dt=Math.min(0.05,now-last); last=now;
+  const now = nowMs/1000; let dt = Math.min(0.05, now-last); last = now;
   drawBackground();
   seaweed.forEach(s=>s.draw(now));
   bubbles.forEach(b=>{b.update(dt); b.draw();});
-  if(pellet && !pellet.eaten){petFish.setTarget(pellet);}
-  if(pellet){pellet.update(dt); pellet.draw();}
+  if(pellet && !pellet.eaten){ petFish.setTarget(pellet); pellet.update(dt); pellet.draw(); }
   petFish.update(dt); petFish.draw();
-  otherFish.forEach(f=>{f.update(dt,pellet); f.draw();});
+  otherFish.forEach(f=>f.update(dt, pellet, otherFish, petFish));
+  otherFish.forEach(f=>f.draw());
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
 </script>
 </body>
 </html>
-<!-- Simple Transparent Footer -->
-<div class="footer">
-  <a href="index.html">Home</a>
-  <a href="about.html">About</a>
-  <a href="privacy.html">Privacy</a>
-  <a href="terms.html">Terms</a>
-  <a href="contact.html">Contact</a>
-</div>
-
-<style>
-  .footer {
-    position: fixed;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 20px;
-    z-index: 10;
-    font-family: 'Arial', sans-serif;
-    font-weight: normal;
-    font-size: 1rem;
-  }
-
-  .footer a {
-    color: rgba(255, 255, 255, 0.7); /* very light text */
-    text-decoration: none;
-    transition: color 0.2s;
-  }
-
-  .footer a:hover {
-    color: #ffffff; /* slightly brighter on hover */
-  }
-</style>
