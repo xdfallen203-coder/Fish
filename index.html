@@ -1,9 +1,43 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Zenfish Aquarium</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ZenFish Interactive Aquarium – Relax and Enjoy</title>
+  <meta name="description" content="ZenFish is an interactive online aquarium where you can feed and watch beautiful fish swim. Relax, unwind, and explore your virtual aquarium." />
+  <meta name="keywords" content="ZenFish, interactive aquarium, relax, fish game, online aquarium, virtual fish tank, feed fish, bubbles, seaweed" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://www.zenfish.site/" />
+  <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "ZenFish Interactive Aquarium",
+  "url": "https://www.zenfish.site/",
+  "description": "ZenFish is an interactive online aquarium where you can feed and watch colorful fish swim in a relaxing environment. Perfect for stress relief and virtual entertainment.",
+  "applicationCategory": "GameApplication",
+  "operatingSystem": "WebBrowser",
+  "author": {
+    "@type": "Person",
+    "name": "ZenFish"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "ZenFish"
+  },
+  "genre": "Simulation, Relaxation",
+  "interactionStatistic": {
+    "@type": "InteractionCounter",
+    "interactionType": "http://schema.org/UserInteraction",
+    "userInteractionCount": 0
+  },
+  "potentialAction": {
+    "@type": "PlayAction",
+    "target": "https://www.zenfish.site/"
+  }
+}
+</script>
+  
 <style>
 html, body { height:100%; margin:0; overflow:hidden; }
 body { background:#001d33; }
@@ -30,6 +64,20 @@ canvas { display:block; width:100vw; height:100vh; }
   <a href="terms.html">Terms</a>
   <a href="contact.html">Contact</a>
 </div>
+  
+  !-- Hidden SEO Content -->
+<div class="sr-only">
+  <h1>ZenFish Interactive Aquarium</h1>
+  <p>Welcome to ZenFish, the ultimate online aquarium where you can feed and watch beautiful virtual fish swim in a relaxing environment. Perfect for stress relief, entertainment, and virtual relaxation.</p>
+  <h2>Features</h2>
+  <ul>
+    <li>Feed fish by clicking or tapping anywhere on the aquarium.</li>
+    <li>Colorful fish with realistic swimming animations.</li>
+    <li>Dynamic day-night background changes.</li>
+    <li>Bubbles, seaweed, and floating objects for a realistic experience.</li>
+    <li>Automatic feeding option for continuous interaction.</li>
+  </ul>
+  <p>Enjoy ZenFish on any device: desktop, tablet, or mobile.</p>
 
 <script>
 const canvas = document.getElementById("aquarium");
@@ -122,11 +170,22 @@ class PetFish{
   }
   draw(){
     ctx.save(); ctx.translate(this.x,this.y); ctx.scale(this.facing,1);
+
+    // Body
     let grad = ctx.createLinearGradient(-this.size,0,this.size,0);
     grad.addColorStop(0,"#ff9933"); grad.addColorStop(1,"#ffcc66");
-    ctx.fillStyle = grad; ctx.beginPath(); ctx.ellipse(0,0,this.size,this.size*0.6,0,0,Math.PI*2); ctx.fill();
-    let flap = Math.sin(this.time*12)*12;
-    ctx.beginPath(); ctx.moveTo(-this.size,0); ctx.lineTo(-this.size-20,flap+this.size*0.4); ctx.lineTo(-this.size-20,flap-this.size*0.4); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.ellipse(0,0,this.size,this.size*0.6,0,0,Math.PI*2); ctx.fill();
+
+    // Tail flapping based on movement
+    let tailFlap = Math.sin(this.time*12)*Math.max(4, Math.abs(this.facing)*12);
+    ctx.beginPath();
+    ctx.moveTo(-this.size,0);
+    ctx.lineTo(-this.size-20,tailFlap+this.size*0.4);
+    ctx.lineTo(-this.size-20,tailFlap-this.size*0.4);
+    ctx.closePath();
+    ctx.fill();
+
     ctx.restore();
   }
 }
@@ -171,9 +230,20 @@ class Fish{
 
   draw(){
     ctx.save(); ctx.translate(this.x,this.y); ctx.scale(this.facing,1); ctx.fillStyle=this.color;
+
+    // Body
     ctx.beginPath(); ctx.ellipse(0,0,this.size,this.size*0.6,0,0,Math.PI*2); ctx.fill();
-    let flap=Math.sin(this.time*10)*8; 
-    ctx.beginPath(); ctx.moveTo(-this.size,0); ctx.lineTo(-this.size-15,flap+this.size*0.4); ctx.lineTo(-this.size-15,flap-this.size*0.4); ctx.closePath(); ctx.fill();
+
+    // Tail flap based on speed
+    let flapAmplitude = Math.min(8, Math.abs(this.speed)*0.2 + 2);
+    let tailFlap = Math.sin(this.time*10)*flapAmplitude;
+    ctx.beginPath();
+    ctx.moveTo(-this.size,0);
+    ctx.lineTo(-this.size-15, tailFlap+this.size*0.4);
+    ctx.lineTo(-this.size-15, tailFlap-this.size*0.4);
+    ctx.closePath();
+    ctx.fill();
+
     ctx.restore();
   }
 }
@@ -211,3 +281,12 @@ requestAnimationFrame(loop);
 </script>
 </body>
 </html>
+  
+  <button onclick="showQuote()">Get Zen Wisdom</button>
+<p id="quote"></p>
+<script>
+  const quotes = ["Swim with the flow!", "Be a zen fish in a digital sea.", "Chill vibes only!"];
+  function showQuote() {
+    document.getElementById("quote").innerText = quotes[Math.floor(Math.random() * quotes.length)];
+  }
+</script>
